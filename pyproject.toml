@@ -1,0 +1,7 @@
+[project]
+dependencies = [
+    "pytest",
+    "csv",
+    "os",
+    "dotenv"
+]
