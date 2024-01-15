@@ -1,7 +1,7 @@
 import pytest
 import lazebot.game_data as gd
 
-gd.__cache = False
+gd.__cache = True
 gd.__useApi = False
 
 

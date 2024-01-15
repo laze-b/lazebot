@@ -1,4 +1,4 @@
-import game_data as gd
+import lazebot.game_data as gd
 
 
 def compute_guild_score(guild_id):

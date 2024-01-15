@@ -12,10 +12,10 @@ def fetch_guild(guild_id):
         print(f"Calling API: {url}")
         guild = requests.get(url).json()
         if __cache:
-            with open(f"../lazebot/data/{guild_id}.json", "w") as f:
+            with open(f"../lazebot/data/cached/{guild_id}.json", "w") as f:
                 f.write(json.dumps(guild))
     else:
-        with open(f"../data/{guild_id}.json") as f:
+        with open(f"../lazebot/data/cached/{guild_id}.json") as f:
             guild = json.load(f)
     return guild
 
@@ -37,10 +37,10 @@ def fetch_players(guild):
             print(f"Calling API: {url}")
             player = requests.get(url).json()
             if __cache:
-                with open(f"../lazebot/data/{allyCode}.json", "w") as f:
+                with open(f"../lazebot/data/cached/{allyCode}.json", "w") as f:
                     f.write(json.dumps(player))
         else:
-            with open(f"../data/{allyCode}.json") as f:
+            with open(f"../lazebot/data/cached/{allyCode}.json") as f:
                 player = json.load(f)
         units = []
         for u in player["units"]:
@@ -52,7 +52,7 @@ def fetch_players(guild):
 
 
 def fetch_op_reqs():
-    with open("../data/ops.txt") as f:
+    with open("../lazebot/data/ops.txt") as f:
         op_reqs = {}
         reader = csv.DictReader(f, delimiter="\t")
         for op in reader:

@@ -160,5 +160,7 @@ cython_debug/
 .idea/
 *.iml
 
+.DS_Store
+
 # custom for this project
-data/cached
+lazebot/data/cached
