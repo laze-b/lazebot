@@ -1,13 +1,14 @@
-import lazebot.game_data as gd
+from lazebot import op_req
+from lazebot import game_data
 
 
 def compute_guild_score(guild_id):
-    players_data = gd.fetch_players(guild_id)
-    op_reqs = gd.fetch_op_reqs()
+    players_data = game_data.fetch_players(guild_id)
+    op_req_relic_tiers = op_req.fetch_op_req_relic_tiers(op_req.fetch_op_reqs())
     guild_ops = {}
 
-    for baseId, opReq in op_reqs:
-        guild_ops[baseId] = GuildOp(opReq)
+    for baseId, req_relic_tiers in op_req_relic_tiers:
+        guild_ops[baseId] = GuildOp(req_relic_tiers)
 
     for player in players_data:
         for unit in player.units:
@@ -21,9 +22,6 @@ def compute_guild_score(guild_id):
         for unit in player.units:
             if unit.baseId in guild_ops:
                 player_score.add_unit_score(guild_ops[unit.baseId], unit)
-
-
-
 
 
 class PlayerScore:
@@ -58,6 +56,23 @@ class UnitScore:
     def compute_ground_score(self, op_req, unit, replacement):
         score = 0
         return score
+
+
+class GuildOp:
+    def __init__(self, req_relic_tiers):
+        self.guildUnits = []
+        self.reqRelicTiers = req_relic_tiers
+
+    def add_guild_unit(self, unit):
+        self.guildUnits.append(unit)
+        self.guildUnits.sort(reverse=True, key=GuildOp.sort_unit)
+
+    @staticmethod
+    def sort_unit(unit):
+        if unit.gearLevel == 13:
+            return unit.gearLevel + unit.relicTier
+        else:
+            return unit.gearLevel
 
 # reqs: 7 7 5 5
 # replacement: 3

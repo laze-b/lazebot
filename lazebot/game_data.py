@@ -1,8 +1,8 @@
 import requests
 import json
 
-__useApi = False
 __cache = True
+__useApi = False
 
 
 def fetch_guild(guild_id):
@@ -48,7 +48,6 @@ def fetch_players(guild):
             units.append(unit)
         players.append(Player(allyCode, player["data"]["name"], units))
     return players
-
 
 
 class Player:
