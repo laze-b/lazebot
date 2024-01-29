@@ -3,10 +3,38 @@ from lazebot import game_data
 from lazebot import item_value
 from dataclasses import dataclass
 
+"""
+INPUTS:
+ally_code
+compute_guild - True to compute for the guild, False for just the player
+
+SCORING:
+- scoring is based on unit replacement cost, based on ops needs and the guild's overall units
+- since phases run one at a time, only count the phase where the player's unit satisfies the requirement
+and has the highest replacement cost
+- for simplicity, assume the goal is to eventually max all phases and don't account for specific guild plans or preloads
+
+OUTLINE:
+Collect all operations requirement baseIds
+for each unique req baseId
+    Collect all matching guild units
+for each player (either one, or all in guild based on inputs)
+    for each unique req baseId
+        get the player unit
+        get all guild units
+        for each phase satisfied by the player unit
+            get the count of op reqs in that phase 
+            sort the guild units in descending order
+            use the first x units to satisfy the number of operations requirements needed
+            compute a score against the reserve units (the units that would replace the player's, if they left)
+        use the max phase score and add to player score
+    output total score for player
+output guild report
+"""
 
 def compute_guild_score(guild_id):
-    players_data = game_data.fetch_players(guild_id)
     op_req_relic_tiers = op_req.fetch_op_req_relic_tiers(op_req.fetch_op_reqs())
+    players_data = game_data.fetch_players(guild_id)
     guild_ops = {}
 
     for baseId, req_relic_tiers in op_req_relic_tiers:
@@ -76,6 +104,7 @@ class GuildOp:
         else:
             return unit.gearLevel
 
+
 @dataclass(frozen=True)
 class __ScoreParams:
     num_units_to_compare: int
@@ -96,32 +125,40 @@ class Unit:
 
 
 @dataclass(frozen=True)
+class UnitScoreComponent:
+    guildUnit: Unit
+    score: float
+
+
+@dataclass(frozen=True)
 class UnitScore:
     unit: Unit
     guildUnits: list[Unit]
     op_reqs: list[int]
-    score: float
+    components: list[UnitScoreComponent]
 
 
 def __compute_unit_score(player_unit: Unit, guild_units: list[Unit], op_reqs: list[int]) -> UnitScore:
     if player_unit.ship:
-        return __compute_ship_score(player_unit, guild_units, len(op_reqs))
+        return __compute_ship_score(player_unit, guild_units, op_reqs)
     else:
         return __compute_ground_score(player_unit, guild_units, op_reqs)
 
 
-def __compute_ship_score(player_unit: Unit, guild_units: list[Unit], op_req_count: int) -> UnitScore:
+def __compute_ship_score(player_unit: Unit, guild_units: list[Unit], op_reqs: list[int]) -> UnitScore:
     """
     Compute the guild op score for a ship unit.
 
     :param player_unit: The player's unit
-    :param guild_units: List of all units in the guild (inclusive of the player)
-    :param op_req_count: Number of units required across all ops zones
+    :param guild_units: List of all other units in the guild (excludes player_unit)
+    :param op_reqs: List of all relic tier requirements for the unit, each represents a distinct instance of an
+        operation requirement (for ships, the count is all that matters)
     :return: the computed score
     """
 
     score = 0.
     # we only get credit if it's actually required, and we meet the requirement
+    op_req_count = len(op_reqs)
     if player_unit.rarity == 7 and op_req_count > 0:
         compare_units = sorted(guild_units, key=lambda x: x.rarity, reverse=True)
         # pad the compare_units if there aren't enough in the guild
@@ -133,7 +170,7 @@ def __compute_ship_score(player_unit: Unit, guild_units: list[Unit], op_req_coun
             score += weight * item_value.compute_shard_value(7, guild_unit.rarity)
             weight = weight * __score_params.decay
 
-    return UnitScore(player_unit, guild_units, op_req_count * [7], score)
+    return UnitScore(player_unit, guild_units, op_reqs, score)
 
 
 def __compute_ground_score(player_unit: Unit, guild_units: list[Unit], op_reqs: list[int]) -> UnitScore:
@@ -141,7 +178,7 @@ def __compute_ground_score(player_unit: Unit, guild_units: list[Unit], op_reqs: 
     Compute the guild op score for a ground unit.
 
     :param player_unit: The player's unit
-    :param guild_units: List of all units in the guild (inclusive of the player)
+    :param guild_units: List of all other units in the guild (excludes player_unit)
     :param op_reqs: List of all relic tier requirements for the unit, each represents a distinct instance of an
         operation requirement
     :return: the computed score
@@ -149,9 +186,9 @@ def __compute_ground_score(player_unit: Unit, guild_units: list[Unit], op_reqs: 
 
     score = 0.
     num_required = len(op_reqs)
-    # we only get credit if it's actually required, and we meet the requirement
+    # we only get credit if it's actually required, and we meet a requirement
     if num_required > 0 and player_unit.relic >= min(op_reqs):
-        compare_units = sorted(guild_units, key=lambda x: x.gear + x.relic, reverse=True)
+        compare_units = sorted(guild_units, key=lambda x: x.gear + x.relic + x.rarity, reverse=True)
         # pad the compare_units if there aren't enough in the guild
         while len(compare_units) < (__score_params.num_units_to_compare + num_required):
             compare_units.append(Unit("dummy", 0, -1, 0, True))
