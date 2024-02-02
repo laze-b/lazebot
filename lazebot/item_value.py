@@ -6,6 +6,7 @@ Functions:
     compute_shard_value - compute the value of rarity (star) levels
 """
 
+
 def compute_gear_value(my_relic_tier: int, baseline_relic_tier: int) -> float:
     """
     Compute the value of a relic tier above a baseline.
@@ -106,7 +107,6 @@ __relic_values = [
     __value_r8,  # 10,024
     __value_r9  # 15,395
 ]
-
 
 __shard_value = 50 / (120 / 16 / 3)  # 20 (farming cost)
 

@@ -1,78 +1,69 @@
-import requests
-import json
-
-__cache = True
-__useApi = False
+from dataclasses import dataclass
+from lazebot import swgohgg
 
 
-def fetch_guild(guild_id):
-    if __useApi:
-        url = f"http://api.swgoh.gg/guild-profile/{guild_id}"
-        print(f"Calling API: {url}")
-        guild = requests.get(url).json()
-        if __cache:
-            with open(f"../lazebot/data/cached/{guild_id}.json", "w") as f:
-                f.write(json.dumps(guild))
-    else:
-        with open(f"../lazebot/data/cached/{guild_id}.json") as f:
-            guild = json.load(f)
-    return guild
-
-
-def get_ally_codes(guild):
-    ally_codes = []
-    for member in guild["data"]["members"]:
-        if member["ally_code"] is not None:
-            ally_codes.append(member["ally_code"])
-    return ally_codes
-
-
-def fetch_players(guild):
-    ally_codes = get_ally_codes(guild)
-    players = []
-    for allyCode in ally_codes:
-        if __useApi:
-            url = f"http://api.swgoh.gg/player/{allyCode}"
-            print(f"Calling API: {url}")
-            player = requests.get(url).json()
-            if __cache:
-                with open(f"../lazebot/data/cached/{allyCode}.json", "w") as f:
-                    f.write(json.dumps(player))
-        else:
-            with open(f"../lazebot/data/cached/{allyCode}.json") as f:
-                player = json.load(f)
-        units = []
-        for u in player["units"]:
-            data = u["data"]
-            unit = Unit(data["base_id"], data["gear_level"], data["relic_tier"], data["rarity"], data["combat_type"])
-            units.append(unit)
-        players.append(Player(allyCode, player["data"]["name"], units))
-    return players
-
-
-class Player:
-    def __init__(self, ally_code, name, units):
-        self.allyCode = ally_code
-        self.name = name
-        self.units = units
-
-    def __str__(self):
-        return f"Player(\"{self.allyCode}\", \"{self.name}\", \"{self.units}\")"
-
-    def __repr__(self):
-        return f"Player(\"{self.allyCode}\", \"{self.name}\", \"{self.units}\")"
-
-
+@dataclass(frozen=True)
 class Unit:
-    def __init__(self, base_id, gear_level, relic_tier, rarity, combat_type):
-        self.baseId = base_id
-        self.gearLevel = int(gear_level)
-        self.relicTier = int(relic_tier) - 2
-        self.rarity = int(rarity)
-        self.isShip = combat_type == "2"
+    baseId: str
+    name: str
+    gear: int  # range 0 - 13
+    relic: int  # range -1 - 7
+    rarity: int  # range 0 - 7
+    ship: bool
+    allyCode: str = None  # player ID that owns the unit
+    owner: str = None  # player name that owns the unit
 
-    def __str__(self):
-        return f"Unit(\"{self.baseId}\", {self.gearLevel}, {self.relicTier}, {self.rarity}, {self.isShip})"
 
-    def __repr__(self):
-        return f"Unit(\"{self.baseId}\", {self.gearLevel}, {self.relicTier}, {self.rarity}, {self.isShip})"
+@dataclass(frozen=True)
+class Player:
+    allyCode: str
+    name: str
+    units: list[Unit]
+
+
+def fetch_players_and_guild_units(
+        ally_code: str, base_ids: set[str]) -> (str, dict[str, Player], dict[str, list[Unit]]):
+    guild_id = __fetch_guild_id(ally_code)
+    guild_name, players = __fetch_players(guild_id, base_ids)
+    guild_units = __generate_guild_units(players)
+
+    return guild_name, players, guild_units
+
+
+def __fetch_guild_id(ally_code):
+    player_data = swgohgg.fetch_player(ally_code)
+    guild_id = player_data["data"]["guild_id"]
+    return guild_id
+
+
+def __fetch_players(guild_id, base_ids):
+    players = {}
+    guild_data = swgohgg.fetch_guild(guild_id)
+    guild_name = guild_data["data"]["name"]
+    for members_data in guild_data["data"]["members"]:
+        next_ally_code = str(members_data["ally_code"])
+        if next_ally_code is not None:
+            next_player_data = swgohgg.fetch_player(next_ally_code)
+            players[next_ally_code] = __create_player(next_ally_code, next_player_data, base_ids)
+    return guild_name, players
+
+
+def __generate_guild_units(players):
+    guild_units = {}
+    for player in players.values():
+        for unit in player.units:
+            guild_units.setdefault(unit.baseId, [])
+            guild_units[unit.baseId] += [unit]
+    return guild_units
+
+
+def __create_player(ally_code: str, player_data: dict, base_ids: set[str]):
+    player_name = player_data["data"]["name"]
+    units = []
+    for u in player_data["units"]:
+        data = u["data"]
+        if data["base_id"] in base_ids:
+            unit = Unit(data["base_id"], data["name"], data["gear_level"], data["relic_tier"] - 2, data["rarity"],
+                        data["combat_type"] == 2, ally_code, player_name)
+            units.append(unit)
+    return Player(str(ally_code), player_name, units)

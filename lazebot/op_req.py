@@ -20,6 +20,12 @@ __OP_REQ: DataFrame = __fetch_op_reqs()
 
 
 def fetch_unique_base_ids() -> set[str]:
+    """
+    Fetch the unique set of baseId values used in operations.
+
+    :return: set of baseIds
+    """
+
     return set(__OP_REQ["baseId"])
 
 

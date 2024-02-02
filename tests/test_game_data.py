@@ -1,14 +1,13 @@
 import pytest
 from lazebot import game_data
 
-game_data.__cache = True
-game_data.__useApi = False
-
 
 def test_fetch():
-    guild = game_data.fetch_guild("W6ig-DV0RoKkfTQOa1hTGw")
-    print(guild)
-    print(game_data.fetch_players(guild))
+    (guild_name, players, guild_units) = game_data.fetch_players_and_guild_units(
+        "736645715", {"BOBAFETTSCION", "TIEINTERCEPTOR"})
+    print(guild_name)
+    print(players)
+    print(guild_units)
     assert True
 
 
