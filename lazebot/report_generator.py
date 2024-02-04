@@ -5,7 +5,10 @@ from lazebot.game_data import Unit
 import os
 
 
-def op_score_report(ally_code: str, compute_guild: bool, max_phase: int = 6, verbose: bool = True) -> str:
+MAX_REPORT_LENGTH = 2000  # discord maximum
+
+
+async def op_score_report(ally_code: str, compute_guild: bool, max_phase: int = 6, verbose: bool = True) -> str:
     score_params = guild_op_score.__DEFAULT_SCORE_PARAMS
     if compute_guild:
         guild_name, player_scores = guild_op_score.compute_guild_score(ally_code, max_phase, score_params)
@@ -14,9 +17,10 @@ def op_score_report(ally_code: str, compute_guild: bool, max_phase: int = 6, ver
         player_score = guild_op_score.compute_player_score(ally_code, max_phase, score_params)
         player_score.unitScores.sort(reverse=True, key=lambda x: x.score())
         report = __player_op_score_report(player_score, verbose)
-    if len(report) > 2000:
-        report = __truncate_report(report, 2000)
-    return report
+
+    if len(report) > MAX_REPORT_LENGTH - 6:
+        report = __truncate_report(report, MAX_REPORT_LENGTH - 6)  # leave 6 for code block backticks
+    return f"```{report}```"
 
 
 def __guild_op_score_report(guild_name: str, player_scores: list[PlayerScore]) -> str:
@@ -74,5 +78,5 @@ def __plural(count: int, word: str):
 
 def __truncate_report(report: str, length: int):
     if len(report) > length:
-        report = report[:1965] + '\n---------- truncated ----------'
+        report = report[:length-32] + '\n---------- truncated ----------'
     return report
