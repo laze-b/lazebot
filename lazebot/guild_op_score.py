@@ -69,7 +69,8 @@ class ScoreParams:
     decay: float
 
 
-__DEFAULT_SCORE_PARAMS = ScoreParams(5, 1, .5)
+# these were chosen so the sum of all the weights is close to 1
+__DEFAULT_SCORE_PARAMS = ScoreParams(5, .52, .5)
 
 
 def compute_player_score(ally_code: str, max_phase: int, score_params=__DEFAULT_SCORE_PARAMS) -> PlayerScore:

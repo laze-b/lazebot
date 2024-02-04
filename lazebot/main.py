@@ -43,8 +43,9 @@ async def op_score(interaction: discord.Interaction, ally_code: str, guild: bool
                    max_phase: app_commands.Range[int, 1, 6] = 6,
                    verbose: bool = True):
     await interaction.response.defer()
-    result = await report_generator.op_score_report(ally_code, guild, max_phase, verbose)
-    await interaction.followup.send(result)
+    (title, description) = report_generator.op_score_report(ally_code, guild, max_phase, verbose)
+    embed = discord.Embed(title=title, description=description, color=0xd1d4d7)
+    await interaction.followup.send(embed=embed)
 
 
 try:
