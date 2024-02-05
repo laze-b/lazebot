@@ -1,0 +1,1 @@
+Empty directory used to cache files when testing.

@@ -163,4 +163,4 @@ cython_debug/
 .DS_Store
 
 # custom for this project
-lazebot/data/cached
+filecache
