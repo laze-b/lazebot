@@ -83,7 +83,7 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache \
     poetry install --no-root --with test
 
-EXPOSE 8080
+#EXPOSE 8080
 CMD ["bash"]
 
 
@@ -106,5 +106,5 @@ WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 COPY lazebot/ lazebot/
 
-EXPOSE 8080
+#EXPOSE 8080
 CMD ["python3", "lazebot/main.py"]
