@@ -105,6 +105,7 @@ COPY --from=builder-base $VIRTUAL_ENV $VIRTUAL_ENV
 WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 COPY lazebot/ lazebot/
+RUN mkdir filecache
 
 #EXPOSE 8080
 CMD ["python3", "lazebot/main.py"]
