@@ -14,11 +14,12 @@ class MyClient(discord.Client):
     async def setup_hook(self):
         # This copies the global commands over to your guild.
         guild_ids = os.getenv("GUILD_IDS")
-        for guild_id in guild_ids.split(","):
-            my_guild = discord.Object(id=guild_id)
-            self.tree.copy_global_to(guild=my_guild)
-            print(f"Syncing commands to guild {guild_id}")
-            await self.tree.sync(guild=my_guild)
+        if guild_ids:
+            for guild_id in guild_ids.split(","):
+                my_guild = discord.Object(id=guild_id)
+                self.tree.copy_global_to(guild=my_guild)
+                print(f"Syncing commands to guild {guild_id}")
+                await self.tree.sync(guild=my_guild)
 
         # global sync - takes an hour
         # await self.tree.sync()
