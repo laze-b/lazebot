@@ -30,7 +30,7 @@ def fetch_players_and_guild_units(
     return guild_name, players, guild_units
 
 
-def __fetch_guild_id(ally_code):
+def __fetch_guild_id(ally_code: str):
     player_data = swgohgg.fetch_player(ally_code)
     guild_id = player_data["data"]["guild_id"]
     return guild_id

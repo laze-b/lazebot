@@ -4,6 +4,7 @@ from discord import app_commands
 import discord
 import report_generator
 import logging
+from lazebot.exceptions import *
 
 
 class MyClient(discord.Client):
@@ -49,10 +50,27 @@ async def on_ready():
 async def op_score(interaction: discord.Interaction, ally_code: str, guild: bool = False,
                    max_phase: app_commands.Range[int, 1, 6] = 6,
                    verbose: bool = True):
-    await interaction.response.defer()
-    (title, description) = report_generator.op_score_report(ally_code, guild, max_phase, verbose)
-    embed = discord.Embed(title=title, description=description, color=0xd1d4d7)
-    await interaction.followup.send(embed=embed)
+    try:
+        await interaction.response.defer()
+        ally_code = __sanitize_ally_code(ally_code)
+        (title, description) = report_generator.op_score_report(ally_code, guild, max_phase, verbose)
+        embed = discord.Embed(title=title, description=description, color=0xd1d4d7)
+        await interaction.followup.send(embed=embed)
+    except PlayerNotFoundException:
+        print(f"Player not found for ally_code={ally_code}")
+        await interaction.followup.send("Those records are missing from the jedi archives. Please try another another.")
+    except Exception as ex:
+        print(
+            f"Unexpected error with inputs ally_code={ally_code}, guild={guild}, max_phase={max_phase}, verbose={verbose}",
+            ex)
+        await interaction.followup.send("Something went wrong with my circuits. Please try again.")
+
+
+def __sanitize_ally_code(ally_code: str):
+    ally_code = ally_code.replace("-", "")
+    if len(ally_code) != 9:
+        raise PlayerNotFoundException
+    return ally_code
 
 
 try:

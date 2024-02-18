@@ -1,6 +1,7 @@
 import pytest
 from lazebot import report_generator
 
+
 def test_op_score_report_guild():
     result = report_generator.op_score_report("736645715", True)
     assert result[0] == """\
@@ -63,6 +64,7 @@ Aquafit (317353364): 89
 Azrael (734139688): 86
 Carl (387674373): 0```"""
 
+
 def test_op_score_report_guild_max_phase():
     result = report_generator.op_score_report("242848755", True, max_phase=2)
     assert result[0] == """\
@@ -124,6 +126,7 @@ Arcann (138862254): 0
 laitea (152668344): 0
 Rfox (462362841): 0
 WoSR (244352453): 0```"""
+
 
 def test_op_score_report_player():
     result = report_generator.op_score_report("242848755", False)
@@ -310,6 +313,7 @@ B1 Battle Droid: 363
   backups
 ---------- truncated ----------```"""
 
+
 def test_op_score_report_player_max_phase():
     result = report_generator.op_score_report("242848755", False, max_phase=2)
     assert result[0] == """\
@@ -394,6 +398,7 @@ The Mandalorian: 89
 Logray: 86
   3 req in P1 @ R5
   backups = R7, R7, R7, R6, R3```"""
+
 
 def test_op_score_report_player_non_verbose():
     result = report_generator.op_score_report("242848755", False, verbose=False)
