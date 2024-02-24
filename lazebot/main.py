@@ -1,10 +1,12 @@
 import os
 from dotenv import load_dotenv
 from discord import app_commands
+from discord.ext import commands
 import discord
 import report_generator
 import logging
 from lazebot.exceptions import *
+from lazebot.ai import AI
 
 
 class MyClient(discord.Client):
@@ -34,6 +36,21 @@ client = MyClient(intents=intents)
 async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
+
+
+@client.event
+async def on_message(message):
+    if ai and not message.author.bot and client.user.mentioned_in(message):
+        print(client.user.id)
+        print(message.content)
+        print(message.mentions)
+        print(f"calling ai.reply_with_humor({client.user.id}, {message.content})")
+        response = ai.reply_with_humor(client.user.id, message.content)
+        print(f"response={response}")
+        for mention in message.mentions:
+            response = response.replace(f"@{mention.id}", f"<@{mention.id}>")
+        print(f"cleaned response={response}")
+        await message.channel.send(response)
 
 
 @client.tree.command(
@@ -75,13 +92,20 @@ def __sanitize_ally_code(ally_code: str):
 
 try:
     load_dotenv()
-    token = os.getenv("DISCORD_TOKEN") or ""
-    if token == "":
-        raise Exception("Please add your token to the Secrets pane.")
 
+    # logging setup
     handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
     # handler = None
-    client.run(token, log_handler=handler)
+
+    # create AI
+    gemini_api_key = os.getenv("GEMINI_API_KEY") or ""
+    if not gemini_api_key == "":
+        ai = AI(gemini_api_key)
+
+    discord_token = os.getenv("DISCORD_TOKEN") or ""
+    if discord_token == "":
+        raise Exception("Please include a valid DISCORD_TOKEN in the environment.")
+    client.run(discord_token, log_handler=handler)
 except discord.HTTPException as e:
     if e.status == 429:
         print(
