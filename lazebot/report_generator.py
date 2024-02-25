@@ -6,9 +6,8 @@ import os
 
 MAX_REPORT_LENGTH = 4090  # discord embed maximum
 OPS_SCORE_TITLE = '''\
-==============      Ops Score Report (RoTE)      ==============
-Scores reflect how much a guild relies on a player for TB ops. 
-Rare units and higher relics contribute the most.
+====  Ops Score Report (RoTE)  ====
+Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units'''
 

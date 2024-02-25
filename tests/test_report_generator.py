@@ -5,9 +5,8 @@ from lazebot import report_generator
 def test_op_score_report_guild():
     result = report_generator.op_score_report("736645715", True)
     assert result[0] == """\
-==============      Ops Score Report (RoTE)      ==============
-Scores reflect how much a guild relies on a player for TB ops. 
-Rare units and higher relics contribute the most.
+====  Ops Score Report (RoTE)  ====
+Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units"""
     assert result[1] == """\
@@ -68,9 +67,8 @@ Carl (387674373): 0```"""
 def test_op_score_report_guild_max_phase():
     result = report_generator.op_score_report("242848755", True, max_phase=2)
     assert result[0] == """\
-==============      Ops Score Report (RoTE)      ==============
-Scores reflect how much a guild relies on a player for TB ops. 
-Rare units and higher relics contribute the most.
+====  Ops Score Report (RoTE)  ====
+Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units"""
     assert result[1] == """\
@@ -131,9 +129,8 @@ WoSR (244352453): 0```"""
 def test_op_score_report_player():
     result = report_generator.op_score_report("242848755", False)
     assert result[0] == """\
-==============      Ops Score Report (RoTE)      ==============
-Scores reflect how much a guild relies on a player for TB ops. 
-Rare units and higher relics contribute the most.
+====  Ops Score Report (RoTE)  ====
+Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units"""
     assert result[1] == """\
@@ -317,9 +314,8 @@ B1 Battle Droid: 363
 def test_op_score_report_player_max_phase():
     result = report_generator.op_score_report("242848755", False, max_phase=2)
     assert result[0] == """\
-==============      Ops Score Report (RoTE)      ==============
-Scores reflect how much a guild relies on a player for TB ops. 
-Rare units and higher relics contribute the most.
+====  Ops Score Report (RoTE)  ====
+Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units"""
     assert result[1] == """\
@@ -403,9 +399,8 @@ Logray: 86
 def test_op_score_report_player_non_verbose():
     result = report_generator.op_score_report("242848755", False, verbose=False)
     assert result[0] == """\
-==============      Ops Score Report (RoTE)      ==============
-Scores reflect how much a guild relies on a player for TB ops. 
-Rare units and higher relics contribute the most.
+====  Ops Score Report (RoTE)  ====
+Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units"""
     assert result[1] == """\

@@ -1,7 +1,6 @@
-import google.generativeai as genai
-from dotenv import load_dotenv
-import os
 import random
+
+import google.generativeai as genai
 
 CHARACTERS = ["C-3PO", "K-2SO", "Han Solo", "Darth Vader", "Yoda", "Obi-wan Kenobi", "HK-47", "Mace Windu"]
 
@@ -11,7 +10,7 @@ class AI:
         genai.configure(api_key=api_key)
 
         generation_config = {
-            "temperature": 1.0,
+            "temperature": 0.9,
             "top_p": 0.95,
             "top_k": 40,
             "max_output_tokens": 200,
@@ -43,12 +42,12 @@ class AI:
         prompt = f"""\
 # Context
 You are a discord bot named Lazebot. Your role is to be helpful by bringing humor to the server. All responses should 
-be short and should attempt to be as funny as possible. If you don't know the answer or cannot answer the prompt, 
-respond with a star wars joke instead. Use the voice of {random.choice(CHARACTERS)} from Star Wars in your response. 
+be short and should attempt to be as funny as possible. Use the voice of {random.choice(CHARACTERS)} from Star Wars in your response. 
 If you see the word <@{bot_id}>, that is your ID, and should not be included in the response. 
 If you see the word <@{author_id}>, that is the ID of the person you are responding to. 
 If you see any word that starts with '<@' that is not <@{bot_id}> or <@{author_id}>, that is the ID of 
-someone else on the server. Respond to the message below:
+someone else on the server. Respond to the message below. If you don't know the answer or cannot answer the prompt, 
+respond with a joke related to Star Wars instead.
 
 # Message
 {prompt}"""
