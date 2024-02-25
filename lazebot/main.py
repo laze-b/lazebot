@@ -46,11 +46,6 @@ async def on_message(message):
         try:
             response = ai.reply_with_humor(client.user.id, message.author.id, message.content)
             print(f"response={response}")
-            print(f"mentions={message.mentions}")
-            response = response.replace(f"@{message.author.id}", f"<@{message.author.id}>")
-            for mention in message.mentions:
-                response = response.replace(f"@{mention.id}", f"<@{mention.id}>")
-            print(f"cleaned response={response}")
         except Exception as ex:
             response = "Something went wrong in my circuits. Please try again."
             print(f"Unexpected error with inputs message={message}", ex)
