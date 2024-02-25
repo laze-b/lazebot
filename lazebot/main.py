@@ -1,12 +1,13 @@
-import os
-from dotenv import load_dotenv
-from discord import app_commands
-from discord.ext import commands
-import discord
-import report_generator
 import logging
-from lazebot.exceptions import *
+import os
+
+import discord
+from discord import app_commands
+from dotenv import load_dotenv
+
+import report_generator
 from lazebot.ai import AI
+from lazebot.exceptions import *
 
 
 class MyClient(discord.Client):
@@ -41,15 +42,19 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if ai and not message.author.bot and client.user.mentioned_in(message):
-        print(client.user.id)
-        print(message.content)
-        print(message.mentions)
-        print(f"calling ai.reply_with_humor({client.user.id}, {message.content})")
-        response = ai.reply_with_humor(client.user.id, message.content)
-        print(f"response={response}")
-        for mention in message.mentions:
-            response = response.replace(f"@{mention.id}", f"<@{mention.id}>")
-        print(f"cleaned response={response}")
+        print(f"calling ai.reply_with_humor({client.user.id}, {message.author.id}, {message.content})")
+        try:
+            response = ai.reply_with_humor(client.user.id, message.author.id, message.content)
+            print(f"response={response}")
+            print(f"mentions={message.mentions}")
+            response = response.replace(f"@{message.author.id}", f"<@{message.author.id}>")
+            for mention in message.mentions:
+                response = response.replace(f"@{mention.id}", f"<@{mention.id}>")
+            print(f"cleaned response={response}")
+        except Exception as ex:
+            response = "Something went wrong in my circuits. Please try again."
+            print(f"Unexpected error with inputs message={message}", ex)
+
         await message.channel.send(response)
 
 
@@ -80,7 +85,7 @@ async def op_score(interaction: discord.Interaction, ally_code: str, guild: bool
         print(
             f"Unexpected error with inputs ally_code={ally_code}, guild={guild}, max_phase={max_phase}, verbose={verbose}",
             ex)
-        await interaction.followup.send("Something went wrong with my circuits. Please try again.")
+        await interaction.followup.send("Something went wrong in my circuits. Please try again.")
 
 
 def __sanitize_ally_code(ally_code: str):
