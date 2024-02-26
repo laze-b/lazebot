@@ -75,7 +75,7 @@ __DEFAULT_SCORE_PARAMS = ScoreParams(5, .52, .5)
 
 def compute_player_score(ally_code: str, max_phase: int, score_params=__DEFAULT_SCORE_PARAMS) -> PlayerScore:
     all_op_reqs = op_req.fetch_counts_by_base_id_and_phase(max_phase)
-    (guild_name, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, set(all_op_reqs.keys()))
+    (_, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, set(all_op_reqs.keys()))
 
     player = players[ally_code]
     return __compute_player_score(player, all_guild_units, all_op_reqs, score_params)
@@ -83,7 +83,6 @@ def compute_player_score(ally_code: str, max_phase: int, score_params=__DEFAULT_
 
 def compute_guild_score(ally_code: str, max_phase: int,
                         score_params=__DEFAULT_SCORE_PARAMS) -> (str, list[PlayerScore]):
-
     all_op_reqs = op_req.fetch_counts_by_base_id_and_phase(max_phase)
     (guild_name, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, set(all_op_reqs.keys()))
 

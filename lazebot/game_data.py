@@ -23,6 +23,16 @@ class Player:
 
 def fetch_players_and_guild_units(
         ally_code: str, base_ids: set[str]) -> (str, dict[str, Player], dict[str, list[Unit]]):
+    """
+    Get all players in the same guild as ally_code and any of their units specified in base_ids.
+
+    :param ally_code: The ally_code of the player, used to find the guild.
+    :param base_ids: The IDs of the units we're interested in.
+    :return: tuple of:
+        guild_name - the name of the guild
+        dict[ally_code: Player] - map of players in the guild
+        dict[base_id: list[Unit] - map of units in the guild
+    """
     guild_id = __fetch_guild_id(ally_code)
     guild_name, players = __fetch_players(guild_id, base_ids)
     guild_units = __generate_guild_units(players)
