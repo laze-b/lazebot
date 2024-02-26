@@ -19,17 +19,20 @@ def __fetch_op_reqs() -> DataFrame:
 __OP_REQ: DataFrame = __fetch_op_reqs()
 
 
-def fetch_unique_base_ids() -> set[str]:
+def __fetch_unique_base_ids(max_phase: int, planets_to_exclude: list[str]) -> set[str]:
     """
     Fetch the unique set of baseId values used in operations.
 
     :return: set of baseIds
     """
 
-    return set(__OP_REQ["baseId"])
+    query = f'phase <= {max_phase}'
+    if planets_to_exclude:
+        query = query + f' and planet not in {planets_to_exclude}'
+    return set(__OP_REQ.query(query)["baseId"])
 
 
-def fetch_req_count(base_id: str, phase: int) -> int:
+def __fetch_req_count(base_id: str, phase: int, planets_to_exclude: list[str]) -> int:
     """
     Fetch operation requirement counts for a unit and phase.
 
@@ -37,5 +40,19 @@ def fetch_req_count(base_id: str, phase: int) -> int:
     :param phase - the op phase
     :return: count of requirements for the given unit and phase
     """
+    query = f'baseId == "{base_id}" and phase == {phase}'
+    if planets_to_exclude:
+        query = query + f' and planet not in {planets_to_exclude}'
+    return len(__OP_REQ.query(query))
 
-    return len(__OP_REQ[(__OP_REQ["baseId"] == base_id) & (__OP_REQ["phase"] == phase)])
+
+def fetch_counts_by_base_id_and_phase(
+        max_phase: int = 6,
+        planets_to_exclude: list[str] = None) -> dict[str, dict[int, int]]:
+    base_ids = __fetch_unique_base_ids(max_phase, planets_to_exclude)
+    all_op_reqs = {}
+    for base_id in base_ids:
+        all_op_reqs[base_id] = {}
+        for phase in range(1, max_phase + 1):
+            all_op_reqs[base_id][phase] = __fetch_req_count(base_id, phase, planets_to_exclude)
+    return all_op_reqs

@@ -1,8 +1,8 @@
-from lazebot import guild_op_score
-from lazebot.guild_op_score import ScoreParams
-from lazebot.guild_op_score import PlayerScore
-from lazebot.game_data import Unit
 import os
+
+from lazebot import guild_op_score
+from lazebot.game_data import Unit
+from lazebot.guild_op_score import PlayerScore
 
 MAX_REPORT_LENGTH = 4090  # discord embed maximum
 OPS_SCORE_TITLE = '''\
@@ -10,6 +10,11 @@ OPS_SCORE_TITLE = '''\
 Scores reflect how much a guild relies on a player for TB ops. Rare units and higher relics contribute the most.
 
 Score = Estimated crystal cost of replacing ops units'''
+
+
+def ops_needed_report(ally_code: str, num_backups: int = 1, max_phase: int = 6,
+                      planets_to_exclude: list[str] = None) -> (str, str):
+    return "", ""
 
 
 def op_score_report(ally_code: str, compute_guild: bool, max_phase: int = 6, verbose: bool = True) -> (str, str):
@@ -37,9 +42,7 @@ def __guild_op_score_report(guild_name: str, player_scores: list[PlayerScore]) -
 
 
 def __player_op_score_report(player_score: PlayerScore, verbose: bool) -> str:
-    output = [f'Total score for {player_score.player.name}: {round(player_score.score()):,}']
-    output.append('')
-    output.append('Units:')
+    output = [f'Total score for {player_score.player.name}: {round(player_score.score()):,}', '', 'Units:']
     for unit_score in player_score.unitScores:
         output.append(f'{unit_score.unit.name}: {round(unit_score.score()):,}')
         if verbose:
@@ -63,10 +66,6 @@ def __unit_desc(unit: Unit, score: float = None):
     if score is not None:
         desc.append(f" = {round(score):,}")
     return "".join(desc)
-
-
-def __plural(count: int, word: str):
-    return f'{count} {word}' if count == 1 else f'{count} {word}s'
 
 
 def __truncate_report(report: str, length: int):

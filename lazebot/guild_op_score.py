@@ -74,14 +74,8 @@ __DEFAULT_SCORE_PARAMS = ScoreParams(5, .52, .5)
 
 
 def compute_player_score(ally_code: str, max_phase: int, score_params=__DEFAULT_SCORE_PARAMS) -> PlayerScore:
-    base_ids = op_req.fetch_unique_base_ids()
-    all_op_reqs = {}
-    for base_id in base_ids:
-        all_op_reqs[base_id] = {}
-        for phase in range(1, max_phase + 1):
-            all_op_reqs[base_id][phase] = op_req.fetch_req_count(base_id, phase)
-
-    (guild_name, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, base_ids)
+    all_op_reqs = op_req.fetch_counts_by_base_id_and_phase(max_phase)
+    (guild_name, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, set(all_op_reqs.keys()))
 
     player = players[ally_code]
     return __compute_player_score(player, all_guild_units, all_op_reqs, score_params)
@@ -89,14 +83,9 @@ def compute_player_score(ally_code: str, max_phase: int, score_params=__DEFAULT_
 
 def compute_guild_score(ally_code: str, max_phase: int,
                         score_params=__DEFAULT_SCORE_PARAMS) -> (str, list[PlayerScore]):
-    base_ids = op_req.fetch_unique_base_ids()
-    all_op_reqs = {}
-    for base_id in base_ids:
-        all_op_reqs[base_id] = {}
-        for phase in range(1, max_phase + 1):
-            all_op_reqs[base_id][phase] = op_req.fetch_req_count(base_id, phase)
 
-    (guild_name, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, base_ids)
+    all_op_reqs = op_req.fetch_counts_by_base_id_and_phase(max_phase)
+    (guild_name, players, all_guild_units) = game_data.fetch_players_and_guild_units(ally_code, set(all_op_reqs.keys()))
 
     player_scores = []
     for player in players.values():
