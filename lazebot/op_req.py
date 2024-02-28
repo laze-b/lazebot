@@ -12,14 +12,16 @@ def fetch_counts_by_base_id_and_phase(
 
     :param max_phase: The maximum phase to consider
     :param planets_to_exclude: any planets to exclude
-    :return: map of [base_id: [phase: count]]
+    :return: map of {base_id: {phase: count}}
     """
     base_ids = __fetch_unique_base_ids(max_phase, planets_to_exclude)
     all_op_reqs = {}
     for base_id in base_ids:
         all_op_reqs[base_id] = {}
         for phase in range(1, max_phase + 1):
-            all_op_reqs[base_id][phase] = __fetch_req_count(base_id, phase, planets_to_exclude)
+            count = __fetch_req_count(base_id, phase, planets_to_exclude)
+            if count > 0:
+                all_op_reqs[base_id][phase] = count
     return all_op_reqs
 
 

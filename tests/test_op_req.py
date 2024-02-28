@@ -29,6 +29,7 @@ def test_fetch_counts_by_base_id_and_phase():
     result = op_req.fetch_counts_by_base_id_and_phase()
     assert len(result.keys()) == 274
     assert result["BOBAFETTSCION"] == {1: 5, 2: 12, 3: 10, 4: 6, 5: 9, 6: 9}
+    assert result["JEDIKNIGHTGUARDIAN"] == {3: 3}
 
     result = op_req.fetch_counts_by_base_id_and_phase(max_phase=3)
     assert len(result.keys()) == 226
